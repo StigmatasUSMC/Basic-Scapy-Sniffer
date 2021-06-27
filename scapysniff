@@ -1,0 +1,75 @@
+from scapy.all import *
+import stighelper as sh
+import re
+import os
+import socket
+import sys
+import nmap
+
+try:
+    import nmap
+except Exception as e:
+    print("[!] Install the nmap library: pip install python-nmap")
+    sys.exit(1)
+
+
+os.chdir(r'C:\Users\<user>\Desktop\<folder>')
+eth0 = conf.iface
+z = type(eth0)
+
+
+def localINFO():
+    ip = get_if_addr(conf.iface)
+    mac = get_if_hwaddr(conf.iface)
+    mac = getmacbyip(ip)
+    gw = conf.route.route("0.0.0.0")[2]
+    print(f'Your IP is {ip}, your MAC is {mac}, and your GW is {gw}.')
+
+
+def eavesDrop():
+    a = str(eth0)
+    pkts = sniff(iface=eth0, filter="tcp and port 80", count=10)
+    wrpcap("write1.pcap", pkts)
+
+
+def createPacket():
+    packet = Ether()/IP(dst='8.8.8.8')/TCP(dport=53, flags='S')
+
+
+def isAlive():
+    ip = "192.168.1.2"
+    icmp = IP(dst=ip)/ICMP()
+    resp = sr1(icmp, timeout=10)
+    dst_port = 80
+
+    if resp == None:
+        print("The host is down")
+    else:
+        print("The host is up")
+
+
+# eavesDrop()
+
+def readPacket():
+    for pkt in PcapReader("write1.pcap"):
+        print(pkt.dport)
+
+j = rdpcap("write1.pcap")
+
+
+#print(dir(j))
+
+
+'''
+sr(): This function sends the packet and returns all received answered and unanswered packets. It works on layer 3 packets
+sr1(): This function sends the packet and returns only the first packet that answered the packet we sent. It does not return the unanswered packets. It works on layer 3 packets.
+srp(): This function works on layer 2 packets. It cannot be used for layer 3.
+'''
+
+'''
+Methods of of pcap
+'afterglow', 'canvas_dump', 'conversations', 'convert_to', 'diffplot', 'filter', 'getlayer', 'hexdump', 
+'hexraw', 'listname', 'make_lined_table', 'make_table', 'make_tex_table', 'multiplot', 'nsummary', 'nzpadding', 
+'padding', 'pdfdump', 'plot', 'psdump', 'rawhexdump', 'replace', 'res', 'sessions', 'show', 'sr', 'stats', 
+'summary', 'svgdump', 'timeskew_graph
+'''
